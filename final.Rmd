@@ -43,8 +43,8 @@ prefetch $(cat SRR_Acc_List.txt)
 
 for(i=35;i<=49;i++)  
 do  
-	fasterq-dump --split-3 SRR87699${i}  
-	rm SRR87699${i}.sra  
+fasterq-dump --split-3 SRR87699${i}  
+rm SRR87699${i}.sra  
 done  
 ```
 
@@ -81,7 +81,7 @@ https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4357728/
 
 In terms of PolyA selection, it is very likely to enrich mt-rRNA and mt-mRNA which is also rich of AT.
 
-### Preprocess
+### Preprocessing
 
 Use trim_galore to filter out all the low quality reads. If a read have a low mean quality, the mate read would also be dropped.
 
@@ -140,8 +140,8 @@ Perform alignment QC by RseQC.
 There is no corresponding BED file in Ensembl, so I generate my own BED file and from gtf annotation and .bai file from .bam file.
 
 ```{}
-cat ./Homo_sapiens.GRCh38.99.gtf | awk 
-samtools index ./alignments/*bam
+cat ./Homo_sapiens.GRCh38.99.gtf | awk 'OFS="\t" {if ($3=="gene") {print $1,$4-1,$5,$10,$16,$7,$4-1,$5,"0","1","255,","0,"}}' | tr -d '";' > Homo_Sapiens.GRCh38.bed  
+samtools index ./alignments/*bam  
 ```
 
 Perform read_distribution and geneBody_coverage analysis.
@@ -187,6 +187,7 @@ library(magrittr)
 library(dplyr)
 
 summary <- read.csv("./counts.txt.summary", header = T, sep='\t')
+samples <- paste0(Cells, "_", rep(c(1:5),3))
 colnames(summary) <- c("Status", samples)
 summary <- gather(data = summary,
                   key = "samples",
@@ -198,7 +199,6 @@ gene_count <- read.csv("./counts.txt", header = T, sep = '\t')
 dim(gene_count)
   
 gene_count <- gene_count[,-c(2:6)]
-samples <- paste0(Cells, "_", rep(c(1:5),3))
 colnames(gene_count) <- c(colnames(gene_count)[1], samples)
 
 gene_count_df <- gather(data = gene_count,
