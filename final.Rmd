@@ -221,11 +221,56 @@ ggplot(gene_count_df, aes(x=log(Nreads+1), fill=cells))+ geom_histogram(alpha = 
 
 ## Results  
 
-### dendrogram
+### Heatmap and dendrogram
+
+Get data into DESeq2.
+
+```{r, message=F, echo=F}
+library(DESeq2)
+library(magrittr)
+
+rownames(gene_count) <- gene_count$Geneid
+gene_count <- gene_count[,c(2:16)]
+
+sample_info <- DataFrame(Cells = Info$Cells, Time = Info$Time, row.names = colnames(gene_count))
+
+DESeq.ds <- DESeqDataSetFromMatrix(countData = gene_count,
+                                   colData = sample_info,
+                                   design = ~ Cells + Time)
+
+DESeq.rlog <- rlog(DESeq.ds, blind = T)
+
+corr_coeff <- cor(assay(DESeq.rlog), method = "pearson")
+
+as.dist(1-corr_coeff) %>% hclust %>% plot(.,labels = colnames(assay(DESeq.rlog)), main = "rlong transformed read counts")
+
+as.dist(1-corr_coeff, upper = T) %>% as.matrix %>% pheatmap::pheatmap(.,main = "Pearson correlation")
+```
 
 ### PCA
 
+Perform PCA analysis.
+
+```{r, echo=F}
+par(mfrow=c(1,2))
+plotPCA(DESeq.rlog, intgroup = "Cells") 
+plotPCA(DESeq.rlog, intgroup = "Time")
+
+library(biomaRt)
+require(org.Hs.eg.db)
+
+symbols <- select(org.Hs.eg.db, rownames(gene_count), c("SYMBOL","GENENAME","ENTREZID"),"ENSEMBL")
+
+#library(pcaExplorer)
+#pcaExplorer(dds = DESeq.ds, dst = DESeq.rlog)
+```
+
+From the PCA plots we can see that cell lines are the determined factors that seperate samples but not time.
+
+The top loading genes are ENSG00000166923 (gremlin 1, BMP antagonist) for positive coefficient and ENSG00000143631 (filaggrin) for negative.
+
 ### DESeq
+
 
 ### Modeling
 
