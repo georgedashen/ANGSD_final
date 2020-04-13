@@ -1,0 +1,2 @@
+cat ./Homo_sapiens.GRCh38.99.gtf | awk 'OFS="\t" {if ($3=="gene") {print $1,$4-1,$5,$10,$16,$7,$4-1,$5,"0","1","255,","0,"}}' | tr -d '";' > Homo_Sapiens.GRCh38.bed  
+samtools index ./alignments/*bam  
