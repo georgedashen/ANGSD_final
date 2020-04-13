@@ -5,10 +5,12 @@ Reference from Zhang, et.al, Rmd RMarkdown file and html knitted version are inc
 
 Folder:
 
-Scripts: all the bash scripts used in this project, for raw RNA-seq data processing.
+scripts: all the bash scripts used in this project, for raw RNA-seq data processing.
 
 R: all R scripts used for downstream analysis.
 
 QC: quality control figures, basically from MultiQC.
 
 data: intemediate data generated from analysis
+
+figures: figures in the report or important results
