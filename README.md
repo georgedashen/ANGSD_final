@@ -7,7 +7,7 @@ Folder:
 
 scripts: all the bash scripts used in this project, for raw RNA-seq data processing.
 
-R: all R scripts used for downstream analysis.
+R: all R scripts used for downstream analysis, except for one Matlab script used for implementing interpolation and clustering.
 
 QC: quality control figures, basically from MultiQC.
 
