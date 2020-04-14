@@ -9,3 +9,7 @@ initial_PCA_heatmap.R: PCA on all samples, heatmap drawing and found clusters gr
 meta_featureCounts.R: visualization of assignments of mapped reads to features, distribution of mapped features which could be used for further analysis
 
 time_course_PCA.R: implement PCA on each cell lines and found different patterns
+
+Mono_Adapt.R: evaluate monotonicity and adative scores for sensiive and resistant cells
+
+network.R: retrieve PPI and build network using correlation test, degree of nodes
