@@ -142,8 +142,8 @@ summary <- gather(data = summary,
                   "DBTRG_1":"LN18_5")
 summary <- summary[which(summary$Nreads!=0),]
 
-gene_count <- read.csv("./counts.txt", header = T, sep = '\t')
-dim(gene_count)
+gene_count <- read.csv("./counts.txt", header = T, sep = '\t', stringsAsFactors = F)
+#dim(gene_count)
   
 gene_count <- gene_count[,-c(2:6)]
 colnames(gene_count) <- c(colnames(gene_count)[1], samples)
@@ -172,11 +172,24 @@ ggplot(gene_count_df, aes(x=log(Nreads+1), fill=cells))+ geom_histogram(alpha = 
 
 Get data into DESeq2.
 
+```{r, eval=F}
+library(biomaRt)
+
+mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))
+l <- getBM(filters = "ensembl_gene_id", attributes = c("ensembl_gene_id","hgnc_symbol"), values = gene_count$Geneid, mart = mart)
+l <- l[-(which(duplicated(l$ensembl_gene_id)==T)-1),]
+l$hgnc_symbol[which(l$hgnc_symbol == "")] = l$ensembl_gene_id[which(l$hgnc_symbol == "")]
+write.csv(l, file = "symbols.csv", row.names = F, col.names = F)
+```
+
 ```{r, message=F, echo=F}
 library(DESeq2)
 library(magrittr)
 
-rownames(gene_count) <- gene_count$Geneid
+symbols <- read.csv("symbols.csv", stringsAsFactors = F)
+rownames(symbols) <- symbols$ensembl_gene_id
+rownames(gene_count) <- make.unique(as.character(symbols[gene_count$Geneid,]$hgnc_symbol))
+
 gene_count <- gene_count[,c(2:16)]
 gene_count <- gene_count[rowSums(gene_count)!=0,]
 
@@ -206,11 +219,6 @@ par(mfrow=c(1,2))
 plotPCA(DESeq.rlog, intgroup = "Cells") 
 plotPCA(DESeq.rlog, intgroup = "Time")
 
-library(biomaRt)
-require(org.Hs.eg.db)
-
-symbols <- select(org.Hs.eg.db, rownames(gene_count), c("SYMBOL","GENENAME","ENTREZID"),"ENSEMBL")
-
 #library(pcaExplorer)
 #pcaExplorer(dds = DESeq.ds, dst = DESeq.rlog)
 ```
@@ -219,7 +227,7 @@ From the PCA plots we can see that cell lines are the determined factors that se
 
 ![Top Loading of PCA](top_loading.png)
 
-The top loading genes are ENSG00000166923 (gremlin 1, BMP antagonist) for positive coefficient and ENSG00000143631 (filaggrin) for negative.
+The top loading genes are GREM1 (BMP antagonist) for positive coefficient and FLG (filaggrin) for negative.
 
 Gremlin primarily inhibits bone morphogenesis and is implicated in disorders of increased bone formation and several cancers.
 
@@ -451,8 +459,6 @@ write.csv(norm.TCG_R, file = 'Net_TCG_R.csv')
 ```
 
 ```{r, eval=F}
-library(biomaRt)
-mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))
 G_list <- getBM(filters = "ensembl_gene_id", attributes = c("ensembl_gene_id","hgnc_symbol"), values = TCGs, mart = mart)
 #which(duplicated(G_list$ensembl_gene_id)==T)
 #1486 CCL3L1
