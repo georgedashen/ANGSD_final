@@ -25,3 +25,5 @@ norm_DEG_R.csv: all max normalized data for resistant cells TCGs, before reunion
 norm_DEG_S.csv: all max normalized data for sensitive cells TCGs, before reunion of both R set and S set. Generated originally from DESeq sizefactor re-scaling.
 
 rlog.csv: Count matrx generated from DESeq rlog function for initial PCA, cluster and heatmap analysis. Not involved in further TCGs selection and analysis steps.
+
+symbols.csv: Ensembl_ID and HGNC symbols for all genes from featureCounts
